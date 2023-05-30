@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap demo</title>
+    <link rel="stylesheet" href="/css/mobile/home-mobile.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/newChat.js" defer></script>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg bg-light">
+        <a href="/profile"><svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor"
+                class="bi bi-person-circle" viewBox="0 0 16 16">
+                <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
+                <path fill-rule="evenodd"
+                    d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z" />
+            </svg></a>
+    </nav>
+    <div class="body">
+        <div class="list-group">
+            <a href="/personal" class="list-group-item list-group-item-action dairy" style="text-decoration: underline;">My Daily Diary</a>
+        </div>
+    </div>
+    <div class="floating-container">
+        <a onclick="newChatShow();">
+        <div class="floating-button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+  <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+</svg>
+        </div>
+        <div class="element-container">
+            </a>
+        </div>
+    </div>
+    <div class="newChat hidden">
+        <!-- <form action="/addChat" method="post" autocomplete="off"> -->
+        <label for="nametxt">Name :-</label>
+        <input type="text" placeholder="Name" id="nametxt" name="name" autocomplete="off" value="">
+        <input type="text" id="email" name="email" class="hidden" value="null">
+        <div id="suggestion" class="hidden">
+           <ul id="ul">        
+           </ul> 
+        </div>
+        <!-- <input type="submit" value="Login" id="newChatLogin"> -->
+        <div class="error hidden whatsapp">
+            <p>If you don't found your friend here invite them via whatsapp</p>
+            <a href="whatsapp://send?text=hey <%= name  %> started new way to manage dailly transaction and also want you to join it .. %0a https://budget-tracker-3zzp.onrender.com/chat?to=<%= email %>">Copy Link</a>
+        </div>
+         <% if(error){ %>
+            <% if(visible){ %>
+                <div class="error visible">
+            <% }else{ %>
+                <div class="error hidden">
+            <%}%>
+            <% if(error2){ %>
+                    <p>What is this behaviour if you want a personal chat click on personal <%= visible  %></p>
+                    <a href="/personal">Personal</a>
+            <% }else{ %>  
+            <% } %> 
+        <% } %>  
+        </form>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>

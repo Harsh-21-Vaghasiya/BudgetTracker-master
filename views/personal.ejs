@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap demo</title>
+    <link rel="stylesheet" href="/css/mobile/mobile-chat.css">
+    <link rel="stylesheet" href="/css/pc/pc-chat.css" media="(min-width: 769px)">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    
+</head>
+
+<body>
+    <nav class="chat-nav">
+        <a href="/home"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left"
+            viewBox="0 0 16 16">
+            <path fill-rule="evenodd"
+                d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z" />
+        </svg></a>
+            <h5>Personal Dairy</h5>
+        <a href="/home"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-house"
+            viewBox="0 0 16 16">
+            <path
+                d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L2 8.207V13.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V8.207l.646.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293L8.707 1.5ZM13 7.207V13.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V7.207l5-5 5 5Z" />
+        </svg></a>
+    </nav>
+    <div class="fields hidden">
+        <form method="post" id="form">
+            <div class="form-group row">
+                <label for="amount" class="col-sm-2 col-form-label">Amount</label>
+                <div class="col-sm-10">
+                    <input type="number" name="amount" class="form-control" id="amount" placeholder="Amount">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="context" class="col-sm-2 col-form-label">Context</label>
+                <div class="col-sm-10">
+                    <input type="text" name="context" class="form-control" id="context" placeholder="For What ?">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="Note" class="col-sm-2 col-form-label">Comment</label>
+                <div class="col-sm-10">
+                     <textarea name="description" id="Note" cols="20" rows="2"></textarea>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-sm-10">
+                    <button type="submit" class="btn btn-primary btn-lg" id="button" onclick="submit()">Send</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="chat-body" id="main">
+        <% if(data){%>
+        <% data.forEach(function(chat){%>
+                <div class="chat-message message" id="messages">
+                    <% if(!chat.got){%>
+                        <div class="chat-message-text sent negative">
+                        <p id="amount">-<%=chat.amount %></p>
+                    <%}else{%>
+                        <div class="chat-message-text received positive">
+                        <p id="amount">+<%=chat.amount %></p>
+                    <%}%>
+                    <details>
+                        <summary><%=chat.context %></summary>
+                        <p>- <%=chat.description %></p>
+                    </details>
+                    <p style="color:grey;font-size:0.8rem;padding: 2px;"><%= chat.time %></p>
+                    </div>
+                </div>
+            <% }); %>  
+        <% } %>
+    </div>
+    <div class="chat-box">
+        <div class="btns">
+            <button type="button" class="btn btn-primary btn-lg" onclick="receive()">Got</button>
+            <button type="button" class="btn btn-secondary btn-lg red"  onclick="send()">Gave</button>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3"
+        crossorigin="anonymous"></script>
+        <script>
+            var isHidden = true;
+            const hide = () => {
+                const unknown = document.querySelector('.fields');
+                if (isHidden) {
+                    unknown.classList.remove('hidden');
+                    isHidden = false;
+                } else {
+                    unknown.classList.add('hidden');
+                    isHidden = true;
+                }
+            }
+            function send() {
+                const form = document.querySelector('#form');
+                form.action = '/personal?got=false';
+                const btn = document.querySelector('#button');
+                const unknown = document.querySelector('.fields');
+                if(isHidden){
+                    unknown.classList.remove('hidden');
+                    isHidden = false;
+                }else if(btn.innerHTML == 'Receive'){
+                    btn.innerHTML = 'Give'
+                }else{
+                    unknown.classList.add('hidden');
+                    isHidden = true;
+                }
+                
+                btn.innerHTML = 'Give';
+            }
+            const receive = () => {
+                const form = document.querySelector('#form');
+                form.action = '/personal?got=true';
+                const btn = document.querySelector('#button');
+                const unknown = document.querySelector('.fields');
+                if(isHidden){
+                    unknown.classList.remove('hidden');
+                    isHidden = false;
+                btn.innerHTML = 'Receive';
+                }else if(btn.innerHTML== 'Give'){
+                    btn.innerHTML = 'Receive';
+                }else{
+                    unknown.classList.add('hidden');
+                    isHidden = true;
+                }
+            }
+
+            function submit() {
+                // console.log('submit');
+                const form = document.querySelector('#form');
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                });
+                form.method = 'POST';
+                const btn = document.querySelector('#button');
+                form.submit();
+            }
+            function scroll(){
+            const body = document.querySelector("#main");
+            // console.log(body);
+            body.scrollTop=body.scrollHeight;
+            }
+            window.onload = scroll();
+    </script>
+</body>
+
+</html>

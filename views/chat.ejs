@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap demo</title>
+    <link rel="stylesheet" href="/css/mobile/mobile-chat.css">
+    <link rel="stylesheet" href="/css/pc/pc-chat.css" media="(min-width: 769px)">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+
+<body>
+    <nav class="chat-nav">
+        <a href="/home"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left"
+            viewBox="0 0 16 16">
+            <path fill-rule="evenodd"
+                d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z" />
+        </svg></a>
+        <% if(user){%>
+            <h5><%=user.name%></h5>
+        <%}%>
+        <a href="/home"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-house"
+            viewBox="0 0 16 16">
+            <path
+                d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L2 8.207V13.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V8.207l.646.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293L8.707 1.5ZM13 7.207V13.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V7.207l5-5 5 5Z" />
+        </svg></a>
+    </nav>
+    <div class="fields hidden">
+        <form method="post" id="form">
+            <div class="form-group row">
+                <label for="amount" class="col-sm-2 col-form-label">Amount</label>
+                <div class="col-sm-10">
+                    <input type="number" name="amount" class="form-control" id="amount" placeholder="Amount" value="" required>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="context" class="col-sm-2 col-form-label">Context</label>
+                <div class="col-sm-10">
+                    <input type="text" name="context" class="form-control" id="context" placeholder="For What ?" value="" required>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="Note" class="col-sm-2 col-form-label">Comment</label>
+                <div class="col-sm-10">
+                     <textarea name="note" id="note" cols="20" rows="2" value=""></textarea>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-sm-10">
+                    <button type="submit" class="btn btn-primary btn-lg" id="button">Send</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="chat-body" id="main">
+        <% if(data){%>
+        <% data.forEach(function(chat){%>
+            <% if(chat.from == main){%>
+                <div class="chat-message message">
+                    <% if(chat.giving){%>
+                        <% if(chat.completed){%>
+                            <div class="chat-message-text sent negative completed">
+                                <% }else{%> 
+                                    <div class="chat-message-text sent negative">
+                                        <% } %> 
+                        <% if(chat.askComplition && chat.askedBy==main && !chat.completed){%>                                         
+                             <p id="<%= chat._id %>P">#-<%=chat.amount %></p>
+                        <% }else if(chat.askedBy!=main && !chat.completed && chat.askComplition){%>
+                            <p id="<%= chat._id %>P">*-<%=chat.amount %></p>
+                        <% }else{%>
+                            <p id="<%= chat._id %>P">-<%=chat.amount %></p>
+                        <% }%> 
+                    <%}else{%>
+                        <% if(chat.completed){%>
+                            <div class="chat-message-text sent positive completed">
+                                <%}else{%>
+                                    <div class="chat-message-text sent positive">
+                                        <%}%>
+                        <% if(chat.askComplition && chat.askedBy==main && !chat.completed){%>                                         
+                             <p id="<%= chat._id %>P">#+<%=chat.amount %></p>
+                        <% }else if(chat.askedBy!=main && !chat.completed && chat.askComplition){%>
+                            <p id="<%= chat._id %>P">*+<%=chat.amount %></p>
+                        <% }else{%>
+                            <p id="<%= chat._id %>P">+<%=chat.amount %></p>
+                        <% }%> 
+                    <%}%>
+                        <details>
+                            <summary><%=chat.context %></summary>
+                            <p><%=chat.note %></p>
+                            <% if(!chat.askComplition && !chat.completed){%>
+                                <a href="#" id="<%= chat._id %>" onclick="askComplition(this,'send')"> Mark as Complition </a>
+                            <%}else if(chat.askComplition && chat.askedBy!=main){%>
+                                <p><%= chat.askedBy %> asked for complition </p>
+                                <a href="#" id="<%= chat._id %>A" onclick="askComplition(this,'accept')"> Accept</a>
+                                <a href="#" id="<%= chat._id %>R" onclick="askComplition(this,'reject')"> reject</a>
+                            <% }else if(!chat.completed){%>
+                                <p id="<%= chat._id %>Q">You asked for complition</p>
+                            <%}else{%>
+                                <p>Complition Marked</p>
+                            <%}%>
+                        </details>
+                        <p style="color:grey;font-size:0.8rem;padding: 2px;"><%= chat.time %></p>
+                    </div>
+                </div>
+            <%}%>
+            <% if(chat.to == main){%>
+                <div class="chat-message message">
+                    <% if(chat.giving){%>
+                        <% if(chat.completed){%>
+                           <div class="chat-message-text received positive completed">
+                               <%}else{%>
+                                <div class="chat-message-text received positive">
+                                    <%}%>
+                        <% if(chat.askComplition && chat.askedBy==main && !chat.completed){%>                                         
+                             <p id="<%= chat._id %>P">#+<%=chat.amount %></p>
+                        <% }else if(chat.askedBy!=main && chat.askComplition && !chat.completed){%>
+                            <p id="<%= chat._id %>P">*+<%=chat.amount %></p>
+                        <% }else{%>
+                            <p id="<%= chat._id %>P">+<%=chat.amount %></p>
+                        <% }%> 
+                    <%}else{%>
+                        <% if(chat.completed){%>
+                            <div class="chat-message-text received negative completed">
+                                <%}else{%>
+                                    <div class="chat-message-text received negative">
+                                        <%}%>
+                        <% if(chat.askComplition && chat.askedBy==main && !chat.completed){%>                                         
+                             <p id="<%= chat._id %>P">#-<%=chat.amount %></p>
+                        <% }else if(chat.askedBy!=main && chat.askComplition && !chat.completed){%>
+                            <p id="<%= chat._id %>P">*-<%=chat.amount %></p>
+                        <% }else{%>
+                            <p id="<%= chat._id %>P">-<%=chat.amount %></p>
+                        <% }%> 
+                    <%}%>
+                        <details>
+                            <summary><%=chat.context %></summary>
+                            <p><%=chat.note %></p>
+                            <% if(!chat.askComplition && !chat.completed){%>
+                                <a href="#" id="<%= chat._id %>" onclick="askComplition(this,'send')"> Mark as Complition </a>
+                            <%}else if(chat.askComplition && chat.askedBy!=main){%>
+                                <a href="#" id="<%= chat._id %>A" onclick="askComplition(this,'accept')"> Accept</a>
+                                <a href="#" id="<%= chat._id %>R" onclick="askComplition(this,'reject')"> reject</a>
+                            <% }else if(!chat.completed){%> %>
+                                <a href="#" id="<%= chat._id %>Q"> You asked for complition </a>
+                            <% }else{%>  
+                                <p>Complition Marked</p>
+                            <%}%>
+                        </details>
+                        <p style="color:grey;font-size:0.8rem;padding: 2px;"><%= chat.time %></p>
+                    </div>
+                </div>
+            <%}%> 
+            <% }); %>  
+        <% } %>
+    </div>
+    <div class="chat-box">
+        <div class="btns">
+            <button type="button" class="btn btn-primary btn-lg" onclick="receive()">Asking</button>
+            <button type="button" class="btn btn-secondary btn-lg red"  onclick="send()">Giving</button>
+        </div>
+        <div class="net">
+            <div id="net-data" class="hidden">
+                <p>Net Balance :-</p>
+                <p id="net">0</p>
+                <a href="#" id="paymentA">Pay</a>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" onclick="payment()" width="100" height="10" fill="currentColor" class="bi bi-question-circle" viewBox="0 0 16 16">
+  <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+  <path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"/>
+</svg>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3"
+        crossorigin="anonymous"></script>
+        <!-- <script src="/js/mobile-chat.js"></script> -->
+<script>
+  var io = io.connect();
+  io.emit("setID",'<%=main%>');
+  io.on("newChat",function(msg){
+    // console.log(msg);
+    // // console.log(JSON.parse(msg));
+    insert(msg);
+  })
+  io.on("setOption",function(data){
+    // console.log(data);
+    // var inner = null;
+    const price = document.getElementById(data.id+'P');
+    if(data.message=='option'){
+      var option = document.getElementById(data.id);
+      var p = document.getElementById(data.id+'P');
+      // if(document.getElementById(data.id+'Q')){
+        // inner = document.getElementById(data.id+'Q');
+        // inner.parentNode.removeChild(inner);
+      // }else{
+        // inner = document.getElementById(data.id);
+      // }
+      // // console.log(option,p,"p");
+      if(p.innerText[0]=='$'){
+        p.innerHTML = '*'+p.innerText.slice(1);
+      }else{
+      p.innerHTML = '*'+p.innerText; ///   ------- need to reviw
+      }
+      let a1=document.createElement('a');
+      a1.href="#";
+      a1.id=data.id+`A`;
+      a1.innerHTML="Accept &nbsp;";
+      a1.setAttribute('onclick','askComplition(this,"accept")');
+      let a2=document.createElement('a');
+      a2.href="#";
+      a2.id=data.id+`R`;
+      a2.innerHTML="Reject";
+      a2.setAttribute('onclick','askComplition(this,"reject")');
+      option.parentNode.appendChild(a1);
+      option.parentNode.appendChild(a2);
+      option.remove();
+      if(document.getElementById(data.id+'Q')){
+        document.getElementById(data.id+'Q').remove();
+      }
+    }
+    else if(data.message=='accepted'){
+      if(document.getElementById(data.id)){
+        document.getElementById(data.id).remove();
+      }
+      const txt = document.getElementById(data.id+'P');  //danger xone
+      txt.parentNode.classList.add('completed');
+      txt.innerHTML = txt.innerText.substring(1);
+      const a = document.getElementById(data.id+'Q');
+      a.innerHTML = 'Complition Marked';
+    }
+    else if(data.message=='rejected'){
+      const txt = document.getElementById(data.id+'Q');
+      // if(price.innerHTML[0]!='$'){
+        price.innerHTML = '$'+price.innerText.substring(1);
+      // txt.parentNode.innerHTML = '';
+      const parent = txt.parentNode;
+      const a1=document.createElement('a');
+      a1.innerHTML ='Mark as complition';
+      a1.href = '#';
+      a1.setAttribute('id',data.id);
+      a1.setAttribute('onclick',`askComplition(this,'send')`);
+      txt.innerHTML = 'Previous attemp is Rejected';
+      txt.parentNode.insertBefore(a1,txt);
+    }
+  });
+  var amount = document.querySelector('#amount');
+  var note = document.querySelector('#note');
+  var context = document.querySelector('#context');
+const form = document.querySelector('#form');
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  submit();
+});
+var isHidden = true
+let total = 0
+let gotTotal = false
+
+const hide = () => {
+  const unknown = document.querySelector('.fields')
+  if (isHidden) {
+    unknown.classList.remove('hidden')
+    isHidden = false
+  } else {
+    unknown.classList.add('hidden')
+    isHidden = true
+  }
+}
+
+function send() {
+  const form = document.querySelector('#form')
+  form.action = '/chat?to=<%=email%>&send=true'
+  const btn = document.querySelector('#button')
+  const unknown = document.querySelector('.fields')
+  if (isHidden) {
+    unknown.classList.remove('hidden')
+    isHidden = false
+  } else if (btn.innerHTML == 'Receive') {
+    btn.innerHTML = 'Give'
+  } else {
+    unknown.classList.add('hidden')
+    isHidden = true
+  }
+
+  btn.innerHTML = 'Give'
+}
+
+const receive = () => {
+  const form = document.querySelector('#form')
+  form.action = '/chat?to=<%=email%>&send=false'
+  const btn = document.querySelector('#button')
+  const unknown = document.querySelector('.fields')
+  if (isHidden) {
+    unknown.classList.remove('hidden')
+    isHidden = false
+    btn.innerHTML = 'Receive'
+  } else if (btn.innerHTML == 'Give') {
+    btn.innerHTML = 'Receive'
+  } else {
+    unknown.classList.add('hidden')
+    isHidden = true
+  }
+}
+
+function submit() {
+  // console.log('submit')
+  const btn = document.querySelector('#button');
+  
+  // console.log(amount.value,note.value,context.value,amount,note,context);
+  const data={
+    amount:amount.value,
+    note:note.value,
+    context:context.value
+  }
+  // console.log(data);
+    const http = new XMLHttpRequest();
+    // const fd = new FormData(form);
+    // // console.log(fd);
+    http.onload = function(){
+      // console.log('success',this.responseText);
+      insert(JSON.parse(this.responseText));
+    }
+    http.onerror = function(){
+      // console.log('erro',this.responseText);
+    }
+    // console.log(btn.innerHTML);
+    if(btn.innerHTML === 'Give'){
+      http.open('POST', '/chat?send=true&to=<%=email%>', true);
+    }else{
+      http.open('POST', '/chat?send=false&to=<%=email%>', true);
+    }
+    http.setRequestHeader('Content-type', 'application/json');
+    http.send(JSON.stringify(data));
+    hide();
+    empty();
+  }
+
+  function empty(){
+    amount.value = '';
+    note.value = '';
+    context.value = '';
+  }
+  // if (btn.innerHTML === 'Send') {
+  //   form.action = '/chat?send=true&to=
+  // } else {
+  //   form.action = '/chat?send=false&to=
+  // }
+  // form.submit(fd);
+    function askComplition(element,query){
+      // console.log(element);
+      const http = new XMLHttpRequest();
+      if(query=='send'){
+      http.open('GET','/complete?to=<%=email%>&id='+element.id,false);
+      http.onload = function(){
+        // console.log('success',this.responseText,JSON.parse(this.responseText));
+        const text = document.getElementById(element.id+'P');
+        // console.log(text,text.innerText);
+        // insert # before text of p tag
+        if(text.innerText[0]=='$'){
+          text.innerHTML = '#'+text.innerText.substring(1);
+        }else{
+          text.innerHTML = '#'+text.innerText;
+        }
+      //   let output=JSON.parse(this.responseText);
+      //   if(output.data === "done"){
+        //  convert anchor tag to p tag
+        // document.getElementById(element.id+'Q').remove();
+        if(document.getElementById(element.id+'Q')){
+          element.remove();
+          document.getElementById(element.id+'Q').innerHTML = 'You asked for complition';
+        }else{
+        const p = document.createElement('p');
+        p.innerHTML = 'You asked for complition';
+        p.setAttribute('id',element.id+'Q');
+        element.parentNode.replaceChild(p,element);
+       }
+
+      }
+    }else if(query=='accept'){
+      http.open('GET','/complete?to=<%=email%>&id='+element.id.substring(0,element.id.length-1)+'&accept=true',false);
+      http.onload = function(){
+        // console.log('success',this.responseText,JSON.parse(this.responseText));
+        const text = document.getElementById(element.id.substring(0,element.id.length-1)+'P');
+        // console.log(text,text.innerText);
+        // document.getElementById(element.id.substring(0,element.id.length-1)).remove();
+        // insert # before text of p tag
+
+        text.innerHTML = text.innerText.substring(1);
+        text.parentNode.classList.add('completed');
+        document.getElementById(element.id.substring(0,element.id.length-1)+'R').remove();
+      //   let output=JSON.parse(this.responseText);
+      //   if(output.data === "done"){
+        //  convert anchor tag to p tag
+        if(document.getElementById(element.id.substring(0,element.id.length-1)+'Q')){
+          // document.getElementById(element.id.substring(0,element.id.length-1)+'Q').remove();
+          document.getElementById(element.id.substring(0,element.id.length-1)+'Q').innerHTML = 'You accepted the complition';
+          element.remove();
+        }else{
+          const p = document.createElement('p');
+          p.innerHTML = 'You accepted the complition';
+          p.setAttribute('id',element.id+'Q');
+          element.parentNode.replaceChild(p,element);
+        }
+      }
+    }else if(query=='reject'){
+        http.open('GET','/complete?to=<%=email%>&id='+element.id.substring(0,element.id.length-1)+'&accept=false',false);
+        http.onload = function(){
+          // console.log('success',this.responseText,JSON.parse(this.responseText));
+          const text = document.getElementById(element.id.substring(0,element.id.length-1)+'P');
+          // console.log(text,text.innerText);
+        // document.getElementById(element.id.substring(0, element.id.length - 1)).remove();
+          // insert # before text of p tag
+          // element.remove(document.getElementById(element.id+'A'));
+          document.getElementById(element.id.substring(0,element.id.length-1)+'A').remove();
+          text.innerHTML = '$'+text.innerText.substring(1);
+        //   let output=JSON.parse(this.responseText);
+        //   if(output.data === "done"){
+          //  convert anchor tag to p tag
+          const p = document.createElement('p');
+          p.innerHTML = 'You rejected the complition';
+          p.setAttribute('id',element.id.substring(0,element.id.length-1)+'Q');
+          // element.parentNode.replaceChild(p,element);
+          element.id=element.id.substring(0,element.id.length-1);
+          element.innerHTML = 'Ask for complition';
+          element.setAttribute('onclick', "askComplition(this,'send')");
+          element.parentNode.appendChild(p);
+        }
+      }
+      http.send();
+    }
+
+ function insert(data){
+   const div1 = document.createElement('div');
+   div1.classList.add('chat-message');
+   div1.classList.add('message');
+   var div2 = document.createElement('div');
+   div2.classList.add('chat-message-text');
+   const p = document.createElement('p');
+   const details = document.createElement('details');
+   const summary = document.createElement('summary');
+   summary.innerHTML = data.context;
+   const note = document.createElement('p');
+   note.innerHTML = data.note;
+   const a = document.createElement('a');
+   a.setAttribute('href', '#');
+   a.setAttribute('onclick', "askComplition(this,'send')");
+   a.setAttribute('id', data._id);
+   a.innerHTML = 'Mark as Complition';
+   // console.log(a);
+   const time = document.createElement('p');
+   time.innerHTML = data.time;
+   time.setAttribute('style', 'color:grey;font-size:0.8rem;padding: 2px;')
+   p.setAttribute('id',data._id+'P');
+    if(data.from == '<%=main%>'){
+      div2.classList.add('sent');
+      if(data.giving){
+        div2.classList.add('negative');
+        p.innerHTML = '-'+data.amount;
+      }else{
+        div2.classList.add('positive');
+        p.innerHTML = '+'+data.amount;
+      }   
+    }else{
+      div2.classList.add('received');
+      if(data.giving){
+        div2.classList.add('positive');
+        p.innerHTML = '+'+data.amount;
+      }else{
+        div2.classList.add('negative');
+        p.innerHTML = '-'+data.amount;
+      }
+    }
+    details.appendChild(summary);
+    details.appendChild(note);
+    details.appendChild(a);
+    div2.appendChild(p);
+    div2.appendChild(details);
+    div2.appendChild(time);
+    div1.appendChild(div2);
+    const main = document.querySelector('#main');
+    main.appendChild(div1);
+    scroll();
+  const net = document.querySelector('#net-data')
+net.classList.add('hidden')
+ }
+
+function scroll() {
+  const body = document.querySelector('#main')
+  body.scrollTop = body.scrollHeight
+}
+
+window.onload = scroll()
+
+function payment() {
+  const net = document.querySelector('#net-data')
+  if (net.classList.contains('hidden')) {
+    // if (!gotTotal) {
+      let sum = 0;
+      var http = new XMLHttpRequest()
+      http.open('GET', '/api/chat?to=<%=email%>', false)
+      http.setRequestHeader('Content-type', 'application/json')
+      http.onload = function () {
+        var data = JSON.parse(http.responseText)
+        // console.log(data.data[0])
+        data.data.forEach(function (item) {
+          // console.log(item)
+          if (!item.completed) {
+            if (item.from == '<%=main%>') {
+              if (item.asking) {
+                // console.log('asking')
+                sum += item.amount
+              } else if (item.giving) {
+                // console.log('giving')
+                sum -= item.amount
+              }
+            } else {
+              if (item.asking) {
+                sum -= item.amount
+              } else if (item.giving) {
+                sum += item.amount
+              }
+            }
+          }
+          // console.log(sum, 'total')
+        })
+      }
+      http.send()
+      document.querySelector('#net').innerHTML = sum  
+      if (sum > 0) {
+        document.querySelector('#paymentA').innerHTML = 'Receive'
+      } else if (sum < 0) {
+        document.querySelector('#paymentA').innerHTML = 'Pay'
+      } else {
+        document.querySelector('#paymentA').innerHTML = 'Nill'
+        document.querySelector('#paymentA').href = '#'
+      }
+      net.classList.remove('hidden')
+  } else {
+    net.classList.add('hidden')
+  }
+}
+</script>
+</body>
+
+</html>
